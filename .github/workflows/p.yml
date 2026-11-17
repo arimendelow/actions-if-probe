@@ -27,27 +27,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: true
-  a:
+  a1:
     needs: [plan, agg]
     if: ${{ !cancelled() && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "${{ toJSON(needs) }}"
-  b:
+      - run: echo '${{ toJSON(needs.*.result) }}'
+  a2:
     needs: [plan, agg]
-    if: ${{ !cancelled() && needs.plan.outputs.installs == 'here' }}
+    if: ${{ !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     steps:
-      - run: true
-  c:
+      - run: echo '${{ toJSON(needs.*.result) }}'
+  a3:
     needs: [plan, agg]
-    if: ${{ !cancelled() && github.event_name == 'push' }}
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-latest
     steps:
-      - run: true
-  d:
+      - run: echo '${{ toJSON(needs.*.result) }}'
+  a4:
     needs: [plan, agg]
-    if: ${{ always() }}
+    if: ${{ !cancelled() && needs.agg.result == 'success' && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo '${{ toJSON(needs) }}'
+      - run: echo '${{ toJSON(needs.*.result) }}'
+  a5:
+    needs: [plan, agg]
+    if: ${{ !cancelled() && !contains(join(needs.*.result, ','), 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo '${{ toJSON(needs.*.result) }}'
+  a6:
+    needs: [plan, agg]
+    if: ${{ always() && !contains(needs.*.result, 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo '${{ toJSON(needs.*.result) }}'
